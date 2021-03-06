@@ -96,14 +96,23 @@ class AuthTests(TestCase):
         # response = app.test_client().get('/', follow_redirects=True)
         self.assertEqual(response.status_code, 200)
         response_text = response.get_data(as_text=True)
-        # self.assertNotIn('Log In', response_text)
+        self.assertNotIn('Log In', response_text)
 
     def test_login_nonexistent_user(self):
         # TODO: Write a test for the login route. It should:
         # - Make a POST request to /login, sending a username & password
         # - Check that the login form is displayed again, with an appropriate
         #   error message
-        pass
+        post_data = {
+            'username': 'm2',
+            'password': 'password',
+
+        }
+        response = app.test_client().post('/login', data=post_data)
+        self.assertEqual(response.status_code, 500)
+        response_text = response.get_data(as_text=True)
+        self.assertIn('Log In', response_text)
+        self.assertIn('error', response_text)
 
     def test_login_incorrect_password(self):
         # TODO: Write a test for the login route. It should:
@@ -112,7 +121,18 @@ class AuthTests(TestCase):
         #   an incorrect password
         # - Check that the login form is displayed again, with an appropriate
         #   error message
-        pass
+        create_user()
+        post_data = {
+            'username': 'me1',
+            'password': 'pass',
+
+        }
+        response = app.test_client().post('/login', data=post_data)
+        self.assertEqual(response.status_code, 200)
+        response_text = response.get_data(as_text=True)
+        self.assertIn('Log In', response_text)
+        self.assertIn('error', response_text)
+
 
     def test_logout(self):
         # TODO: Write a test for the logout route. It should:
@@ -120,4 +140,19 @@ class AuthTests(TestCase):
         # - Log the user in (make a POST request to /login)
         # - Make a GET request to /logout
         # - Check that the "login" button appears on the homepage
-        pass
+        create_user()
+
+        post_data = {
+            'username': 'me1',
+            'password': 'pass',
+
+        }
+        response = app.test_client().post('/login', data=post_data)
+        self.assertEqual(response.status_code, 200)
+
+        response = app.test_client().get('/logout', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        response_text = response.get_data(as_text=True)
+        self.assertIn('Log In', response_text)
+        
+        
